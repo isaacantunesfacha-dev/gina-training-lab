@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:showcase && node --import tsx --test scripts/showcase.test.mjs",
+  "buildCommand": "node --import tsx --test scripts/showcase.test.mjs",
   "outputDirectory": "dist-showcase",
   "framework": null,
   "rewrites": [
