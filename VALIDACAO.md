@@ -16,7 +16,7 @@ Environment: macOS, Node.js `24.21.0`, dependencies locked with `pnpm@11.28.5` (
 
 - **TypeScript Static Typecheck (`npm run lint`):** Passed with zero errors.
 - **Production & Showcase Builds (`npm run build`, `npm run build:showcase`):** Passed; showcase bundle verified free of secrets, internal prompts, and personal identifiers.
-- **Deterministic & Adversarial Evaluation Suite (`npm run test:challenges`):** **47 / 47 passed (100%)** with logical test isolation and zero external API calls.
+- **Deterministic & Adversarial Evaluation Suite (`npm run test:challenges`):** **48 / 48 passed (100%)** with logical test isolation and zero external API calls.
 - **Local Runtime, Security & Salesforce Parity Suite (`npm run test:local`):** All integration, host-guard, injection-scanner, source-packaging, welcome-flow, and Salesforce parity tests passed.
 - **Static Prompt-Injection & Unicode Scan (`npm run scan`):** Zero unallowlisted findings across the repository.
 

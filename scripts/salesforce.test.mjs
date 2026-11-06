@@ -135,6 +135,26 @@ test('contacts without purchases never become VIP', () => {
   }
 });
 
+test('three ignored contacts block owner tasks even for a single purchase day', () => {
+  const today = new Date('2026-10-10T00:00:00Z');
+  const contacts = [
+    {
+      Id: 'c1',
+      Name: 'Cliente c1',
+      HasOptedOutOfEmail: false,
+      Gina_WhatsApp_Consent__c: 'granted',
+      Gina_Ignored_Contacts__c: 7,
+    },
+  ];
+  const orders = [{ Id: 'o1', BillToContactId: 'c1', EffectiveDate: '2026-10-05', TotalAmount: 40, Status: 'Activated' }];
+  const [customer] = buildGinaCustomers(contacts, orders, today);
+
+  assert.equal(customer.facts.classification, 'dormant');
+  assert.equal(customer.facts.recommendedAction, 'dormancy_rest');
+  assert.equal(customer.facts.hasSufficientData, false);
+  assert.equal(buildOwnerTask(customer, today), null);
+});
+
 test('only decisions that need the owner become tasks, and none claims a message was sent', () => {
   const customers = buildGinaCustomers(DEMO_CONTACTS, DEMO_ORDERS, DEMO_TODAY);
   const tasks = Object.fromEntries(customers.map((c) => [c.name, buildOwnerTask(c, DEMO_TODAY)]));

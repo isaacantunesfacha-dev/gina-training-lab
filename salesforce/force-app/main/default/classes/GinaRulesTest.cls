@@ -172,6 +172,12 @@ private class GinaRulesTest {
         Assert.areEqual('oneoff_delayed', oneOff.classification);
         Assert.areEqual(70, oneOff.recencyDays);
 
+        GinaRules.Decision ignoredNew = GinaRules.evaluate(
+            new List<Date>{ Date.newInstance(2026, 10, 1) }, TODAY, 80, false, 'granted', 5);
+        Assert.areEqual('dormant', ignoredNew.classification, '3+ ignorados vencem o ramo de cliente novo');
+        Assert.areEqual('dormancy_rest', ignoredNew.recommendedAction);
+        Assert.isTrue(ignoredNew.explanation.contains('5 contatos anteriores foram ignorados'));
+
         GinaRules.Decision future = GinaRules.evaluate(new List<Date>{ Date.newInstance(2026, 10, 11) }, TODAY, 80, false, 'granted', 0);
         Assert.areEqual('reject_invalid', future.recommendedAction);
 

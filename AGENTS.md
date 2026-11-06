@@ -93,5 +93,5 @@ Before proposing or committing any change, run the full local verification suite
 - **Typecheck (TypeScript):** `npm run lint`
 - **Prompt-injection & Unicode static scan:** `npm run scan`
 - **Package source archive check:** `npm run package:source`
-- **Full evaluation & unit test suite (47 domain/security cases + integration tests):** `npm test`
+- **Full evaluation & unit test suite (48 domain/security cases + integration tests):** `npm test`
 - **Public showcase build:** `npm run build:showcase` (the bundle leak test, `scripts/showcase.test.mjs`, runs in `npm test`)
