@@ -91,7 +91,7 @@ private class GinaRulesTest {
         Assert.areEqual('granted', GinaRules.readConsent(contact(1, 'x', 'granted', false))[0]);
         Assert.areEqual('missing', GinaRules.readConsent(contact(1, 'x', null, false))[0]);
         Assert.areEqual('missing', GinaRules.readConsent(new Contact(LastName = 'sem campos'))[0]);
-        // Opt-out ilegível: "granted" não vale, mas "revoked" continua valendo.
+        // Unreadable opt-out: "granted" does not count, but "revoked" still does.
         Assert.areEqual('missing', GinaRules.readConsent(new Contact(LastName = 'sem opt-out', Gina_WhatsApp_Consent__c = 'granted'))[0]);
         Assert.areEqual('revoked', GinaRules.readConsent(new Contact(LastName = 'sem opt-out', Gina_WhatsApp_Consent__c = 'revoked'))[0]);
     }

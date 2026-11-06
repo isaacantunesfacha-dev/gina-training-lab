@@ -71,7 +71,7 @@ test('consent is never presumed', () => {
   assert.equal(readConsent({ Id: '1', Name: 'x', HasOptedOutOfEmail: true, Gina_WhatsApp_Consent__c: 'granted' }).consent, 'revoked');
   assert.equal(readConsent({ Id: '1', Name: 'x', Gina_WhatsApp_Consent__c: 'revoked' }).consent, 'revoked');
   assert.equal(readConsent({ Id: '1', Name: 'x', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' }).consent, 'granted');
-  // Opt-out ilegível: "granted" não vale, mas revoked continua valendo.
+  // Unreadable opt-out: "granted" does not count, but "revoked" still does.
   assert.equal(readConsent({ Id: '1', Name: 'x', Gina_WhatsApp_Consent__c: 'granted' }).consent, 'missing');
   assert.equal(readConsent({ Id: '1', Name: 'x' }).consent, 'missing');
 });

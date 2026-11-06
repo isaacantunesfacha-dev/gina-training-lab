@@ -8,7 +8,7 @@
 | Ratio | Recency ÷ Observed, shown as `1.6×` | score, risk |
 | In rhythm | Ratio ≤ 1.5×; no message | healthy, safe |
 | Delay / Missed window | Ratio over 1.5× and up to 3.0× | late, at risk |
-| Dormant | Ratio over 3.0×; 90-day rest, no task | churned, lost, critical |
+| Dormant | Ratio over 3.0× or three or more ignored contacts; 90-day rest, no task | churned, lost, critical |
 | Owner task | The one open Salesforce Task Gina creates for human review | message, campaign, send |
 | Create Owner Task | Action that creates the owner task | Send, Approve, Contact |
 | Explain Decision | Opens the rule, numbers and reasoning for one row | Details, Why?, Info |
@@ -22,4 +22,3 @@
 | Expected window | From the last order to 1.0× rhythm | due date, SLA |
 | Rest | 90-day no-contact period after dormancy | pause, snooze, churn |
 | How Gina got here | The four rule checks behind a decision | AI reasoning, model output |
-| Decision artifact | `DA-…` record proving server and engine agree | receipt, log |

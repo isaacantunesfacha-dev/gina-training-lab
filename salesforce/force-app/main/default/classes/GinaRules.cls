@@ -60,10 +60,10 @@ public with sharing class GinaRules {
     }
 
     /**
-     * Consentimento conservador: nunca presume autorização.
-     * Opt-out de e-mail ou campo Gina "revoked" → revogado; campo "granted" com opt-out lido → concedido;
-     * "granted" sem leitura do opt-out → ausente: um opt-out oculto não pode virar autorização;
-     * qualquer outro caso (inclusive campo sem permissão de leitura) → ausente.
+     * Conservative consent: permission is never presumed.
+     * Email opt-out or Gina field "revoked" → revoked; "granted" with the opt-out read → granted;
+     * "granted" without reading the opt-out → missing: a hidden opt-out must not become permission;
+     * any other case (including a field the user cannot read) → missing.
      */
     public static List<String> readConsent(Contact contact) {
         Map<String, Object> fields = contact.getPopulatedFieldsAsMap();
