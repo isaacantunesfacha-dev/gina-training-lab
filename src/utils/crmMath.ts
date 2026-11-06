@@ -239,6 +239,40 @@ export function evaluateDeterministicCrm({
   const lastPurchaseUtc = uniqueUtcDays[uniqueUtcDays.length - 1];
   const recencyDays = Math.max(0, Math.round((currentUtcDay - lastPurchaseUtc) / msPerDay));
 
+  // Calculate gaps between distinct calendar days (empty when there is only one day).
+  const intervals: number[] = [];
+  for (let i = 1; i < uniqueUtcDays.length; i++) {
+    const gap = Math.round((uniqueUtcDays[i] - uniqueUtcDays[i - 1]) / msPerDay);
+    if (gap > 0) {
+      intervals.push(gap);
+    }
+  }
+
+  // 3+ ignored contacts force dormancy rest immediately, including single-purchase-day customers.
+  if (recentIgnoredContacts >= 3) {
+    const median = intervals.length ? calculateMedian(intervals) || 1 : null;
+    const mean = intervals.length ? calculateMean(intervals) : undefined;
+    const ratio = median != null ? Math.round((recencyDays / median) * 100) / 100 : null;
+    const reasonDetail = `${recentIgnoredContacts} contatos anteriores foram ignorados sem resposta`;
+
+    return {
+      medianIntervalDays: median,
+      meanIntervalDays: mean,
+      recencyDays,
+      frequency,
+      distinctDaysCount,
+      ratio,
+      isVip: isVipTier,
+      ignoredContactsCount: recentIgnoredContacts,
+      classification: 'dormant',
+      recommendedAction: 'dormancy_rest',
+      explanation: `Cliente em dormência (${reasonDetail}). A regra de descanso de 90 dias tem precedência absoluta${
+        isVipTier ? ', inclusive para clientes VIP' : ''
+      }, evitando descadastramento (opt-out) ou denúncia por spam.`,
+      hasSufficientData: intervals.length > 0,
+    };
+  }
+
   // If only 1 distinct purchase day
   if (distinctDaysCount === 1) {
     if (recencyDays <= 30) {
@@ -270,26 +304,14 @@ export function evaluateDeterministicCrm({
     }
   }
 
-  // Calculate gaps between distinct calendar days
-  const intervals: number[] = [];
-  for (let i = 1; i < uniqueUtcDays.length; i++) {
-    const gap = Math.round((uniqueUtcDays[i] - uniqueUtcDays[i - 1]) / msPerDay);
-    if (gap > 0) {
-      intervals.push(gap);
-    }
-  }
-
   const median = calculateMedian(intervals) || 1;
   const mean = calculateMean(intervals);
   const ratio = Math.round((recencyDays / median) * 100) / 100;
 
   // Rule: Dormancy precedence over VIP outreach
-  // If recent ignored contacts >= 3 OR ratio > 3.0: dormancy rest ALWAYS applies!
-  if (recentIgnoredContacts >= 3 || ratio > 3.0) {
-    const reasonDetail =
-      recentIgnoredContacts >= 3
-        ? `${recentIgnoredContacts} contatos anteriores foram ignorados sem resposta`
-        : `a recência de ${recencyDays} dias ultrapassou 3.0x do ciclo habitual (${median} dias)`;
+  // Ratio > 3.0: dormancy rest ALWAYS applies. The 3+ ignored rule has already returned above.
+  if (ratio > 3.0) {
+    const reasonDetail = `a recência de ${recencyDays} dias ultrapassou 3.0x do ciclo habitual (${median} dias)`;
 
     return {
       medianIntervalDays: median,

@@ -1,6 +1,6 @@
 name: CI
 
-# Same checks as CLAUDE.md "Local Verification Environment", enforced on every PR and push to main.
+# Same checks as CLAUDE.md "Verification Protocol", enforced on every PR and push to main.
 # No secrets: tests that spawn server.ts must never see SALESFORCE_*, HUBSPOT_* or GEMINI_* values.
 permissions:
   contents: read

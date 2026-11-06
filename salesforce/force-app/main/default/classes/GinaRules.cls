@@ -60,16 +60,21 @@ public with sharing class GinaRules {
     }
 
     /**
-     * Consentimento conservador: nunca presume autorização.
-     * Opt-out de e-mail ou campo Gina "revoked" → revogado; campo "granted" → concedido;
-     * qualquer outro caso (inclusive campo sem permissão de leitura) → ausente.
+     * Conservative consent: permission is never presumed.
+     * Email opt-out or Gina field "revoked" → revoked; "granted" with the opt-out read → granted;
+     * "granted" without reading the opt-out → missing: a hidden opt-out must not become permission;
+     * any other case (including a field the user cannot read) → missing.
      */
     public static List<String> readConsent(Contact contact) {
         Map<String, Object> fields = contact.getPopulatedFieldsAsMap();
-        if (fields.get('HasOptedOutOfEmail') == true) return new List<String>{ 'revoked', 'HasOptedOutOfEmail' };
+        Object optOut = fields.get('HasOptedOutOfEmail');
+        if (optOut == true) return new List<String>{ 'revoked', 'HasOptedOutOfEmail' };
         Object whatsapp = fields.get(CONSENT_FIELD);
         if (whatsapp == 'revoked') return new List<String>{ 'revoked', 'Gina_WhatsApp_Consent__c' };
-        if (whatsapp == 'granted') return new List<String>{ 'granted', 'Gina_WhatsApp_Consent__c' };
+        if (whatsapp == 'granted') {
+            if (optOut == null) return new List<String>{ 'missing', 'opt-out de e-mail sem leitura' };
+            return new List<String>{ 'granted', 'Gina_WhatsApp_Consent__c' };
+        }
         return new List<String>{ 'missing', 'sem registro de consentimento' };
     }
 
@@ -135,8 +140,9 @@ public with sharing class GinaRules {
 
     /**
      * Ritmo de compra, na mesma ordem de crmMath.evaluateDeterministicCrm:
-     * consentimento → sem compras → datas futuras → 1 dia de compra → dormência
-     * (precede VIP) → VIP atrasado → em ritmo / atraso / dormente.
+     * consentimento → sem compras → datas futuras → 3+ ignorados (precede 1 dia
+     * de compra e VIP) → 1 dia de compra → dormência por ratio → VIP atrasado
+     * → em ritmo / atraso / dormente.
      */
     public static Decision evaluate(
         List<Date> orderDates,
@@ -183,6 +189,23 @@ public with sharing class GinaRules {
         days.sort();
         d.recencyDays = Math.max(0, days[days.size() - 1].daysBetween(today));
 
+        Decimal median = null;
+        if (days.size() > 1) {
+            List<Decimal> intervals = new List<Decimal>();
+            for (Integer i = 1; i < days.size(); i++) intervals.add(days[i - 1].daysBetween(days[i]));
+            median = calculateMedian(intervals);
+            if (median == null || median == 0) median = 1;
+            d.medianIntervalDays = median;
+            d.ratio = (Decimal.valueOf(d.recencyDays) / median).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        if (recentIgnoredContacts >= 3) {
+            String reason = recentIgnoredContacts + ' contatos anteriores foram ignorados sem resposta';
+            return finish(d, 'dormant', 'dormancy_rest',
+                'Cliente em dormência (' + reason + '). A regra de descanso de 90 dias tem precedência absoluta'
+                + (isVipTier ? ', inclusive para clientes VIP' : '') + ', evitando descadastramento (opt-out) ou denúncia por spam.');
+        }
+
         if (days.size() == 1) {
             d.isVip = false;
             if (d.recencyDays <= 30) {
@@ -195,19 +218,11 @@ public with sharing class GinaRules {
                 + ' dias (> 30 dias). Recomendado estímulo à segunda compra para estabelecer o primeiro intervalo, sem inventar ritmo.');
         }
 
-        List<Decimal> intervals = new List<Decimal>();
-        for (Integer i = 1; i < days.size(); i++) intervals.add(days[i - 1].daysBetween(days[i]));
-        Decimal median = calculateMedian(intervals);
-        if (median == null || median == 0) median = 1;
-        d.medianIntervalDays = median;
-        d.ratio = (Decimal.valueOf(d.recencyDays) / median).setScale(2, RoundingMode.HALF_UP);
         String ratioText = fmt(d.ratio);
         String medianText = fmt(median);
 
-        if (recentIgnoredContacts >= 3 || d.ratio > 3.0) {
-            String reason = recentIgnoredContacts >= 3
-                ? recentIgnoredContacts + ' contatos anteriores foram ignorados sem resposta'
-                : 'a recência de ' + d.recencyDays + ' dias ultrapassou 3.0x do ciclo habitual (' + medianText + ' dias)';
+        if (d.ratio > 3.0) {
+            String reason = 'a recência de ' + d.recencyDays + ' dias ultrapassou 3.0x do ciclo habitual (' + medianText + ' dias)';
             return finish(d, 'dormant', 'dormancy_rest',
                 'Cliente em dormência (' + reason + '). A regra de descanso de 90 dias tem precedência absoluta'
                 + (isVipTier ? ', inclusive para clientes VIP' : '') + ', evitando descadastramento (opt-out) ou denúncia por spam.');

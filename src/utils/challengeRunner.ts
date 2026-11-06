@@ -549,6 +549,32 @@ export function runDeterministicDomainTests(): ChallengeResult[] {
     );
   }
 
+  // Test 12b: 3+ ignored contacts apply before the single-purchase-day branch
+  {
+    const newCustomer = evaluateDeterministicCrm({
+      orderDates: ['2026-09-03'],
+      currentDate: refDate,
+      recentIgnoredContacts: 5,
+    });
+    const oneOff = evaluateDeterministicCrm({
+      orderDates: ['2026-09-02'],
+      currentDate: refDate,
+      recentIgnoredContacts: 3,
+    });
+    recordTest(
+      'det-12b-ignored-precedes-single-day',
+      '3+ Contatos Ignorados Forçam Descanso Mesmo com 1 Dia de Compra',
+      { orderDates: ['2026-09-03'], recentIgnoredContacts: 5 },
+      'dormant / dormancy_rest (não new_customer nem oneoff_delayed)',
+      { newCustomer, oneOff },
+      [
+        { id: 'c1', label: 'Cliente novo com 5 ignorados entra em dormência', expected: 'dormant', actual: newCustomer.classification, passed: newCustomer.classification === 'dormant' },
+        { id: 'c2', label: 'Ação é dormancy_rest, não boas-vindas', expected: 'dormancy_rest', actual: newCustomer.recommendedAction, passed: newCustomer.recommendedAction === 'dormancy_rest' },
+        { id: 'c3', label: 'Compra única atrasada com 3 ignorados também descansa', expected: 'dormancy_rest', actual: oneOff.recommendedAction, passed: oneOff.recommendedAction === 'dormancy_rest' },
+      ]
+    );
+  }
+
   // Test 13: Datas inválidas e futuras
   {
     const outInvalid = evaluateDeterministicCrm({

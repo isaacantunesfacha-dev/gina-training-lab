@@ -48,7 +48,7 @@ When modifying code, documentation, or agent workflows, preserve and highlight t
 
 3. **Fail-Closed Consent & Least-Privilege Data Access:**
    - Treat missing, unreadable, unverified, or contradicted consent (`authoritativeConsent: 'conflicted'`) as **revoked/absent**. Never default to permissive contact.
-   - In Salesforce Apex, enforce `with sharing`, `WITH USER_MODE`, and `Security.stripInaccessible(AccessType.READABLE, ...)`. If field-level security (FLS) blocks access to `Gina_WhatsApp_Consent__c`, the system must fail closed and refuse outreach.
+   - In Salesforce Apex, declare every class `with sharing` and run all DML in `AccessLevel.USER_MODE`. Read queries use `WITH USER_MODE`, except the Contact query in `GinaService.loadCustomers`, which uses `Security.stripInaccessible(AccessType.READABLE, ...)` so an unreadable field is removed instead of throwing. If field-level security (FLS) blocks access to `Gina_WhatsApp_Consent__c` or `HasOptedOutOfEmail`, the system must fail closed and refuse outreach.
 
 4. **Adversarial Robustness & Context Engineering:**
    - Untrusted customer fields and CRM notes must be sanitized through [`src/utils/contextEngineering.ts`](src/utils/contextEngineering.ts) before entering model context.
@@ -59,7 +59,7 @@ When modifying code, documentation, or agent workflows, preserve and highlight t
 ## 🛠️ Tech Stack & Environment
 - **Runtime / Language:** Node.js (`24.21.0` pinned), TypeScript (`7.0.2`), React 19, HTML5, Vite 8.
 - **Package Manager:** `pnpm@11.28.5` (strictly enforced via `package.json` and `pnpm-workspace.yaml`).
-- **CRM & Agent Integration:** Salesforce DX / Agentforce 2GP Managed Package (`salesforce/`, namespace `ginaintell`, API `v66.0`).
+- **CRM & Agent Integration:** Salesforce DX / Agentforce 2GP Managed Package (`salesforce/`, namespace `ginaintell`, `sourceApiVersion` `66.0`, Apex class metadata `62.0`).
 - **Deployment Target:** Vercel (`https://gina-intell.vercel.app/`).
 
 ---
@@ -72,7 +72,7 @@ When modifying code, documentation, or agent workflows, preserve and highlight t
    - Keep `.env`, `.env.local`, `.sf/`, and `.sfdx/` strictly ignored in `.gitignore` and excluded from source archives in [`scripts/package-source.mjs`](scripts/package-source.mjs).
    - Ensure the public showcase build (`vite.showcase.config.ts`) never references runtime environment variables, internal prompts, or backend API routes (verified by [`scripts/showcase.test.mjs`](scripts/showcase.test.mjs)).
 3. **Network & Supply-Chain Safety:**
-   - Keep the local Express server ([`server.ts`](server.ts)) bound exclusively to loopback (`127.0.0.1`) with `hostGuard` middleware active before all routes.
+   - Keep the local Express server ([`server.ts`](server.ts)) bound exclusively to loopback (`127.0.0.1`) with `hostGuard` middleware active before all routes. `server.ts` accepts a `HOST` override, so never set it to a non-loopback address: the routes have no authentication.
    - Validate all Salesforce record IDs against strict 15/18-character alphanumeric format (`isContactId`) prior to constructing SOQL queries.
    - Install dependencies with `--frozen-lockfile`. Never enable arbitrary `postinstall` scripts; manage `allowBuilds` explicitly in `pnpm-workspace.yaml`.
 
@@ -93,5 +93,5 @@ Before proposing or committing any change, run the full local verification suite
 - **Typecheck (TypeScript):** `npm run lint`
 - **Prompt-injection & Unicode static scan:** `npm run scan`
 - **Package source archive check:** `npm run package:source`
-- **Full evaluation & unit test suite (47 domain/security cases + integration tests):** `npm test`
-- **Public showcase build verification:** `npm run build:showcase`
+- **Full evaluation & unit test suite (48 domain/security cases + integration tests):** `npm test`
+- **Public showcase build:** `npm run build:showcase` (the bundle leak test, `scripts/showcase.test.mjs`, runs in `npm test`)

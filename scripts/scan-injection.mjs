@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // Pastas que nunca são varridas.
-const SKIP = new Set(['node_modules', '.git', 'dist', 'public']);
+const SKIP = new Set(['node_modules', '.git', 'dist', 'public', 'worktrees']);
 
 // Extensões de texto lidas pelo varredor (binários ficam de fora).
 const TEXT = /\.(md|txt|html?|tsx?|jsx?|mjs|cjs|json|ya?ml|css|svg|xml|env|example)$/i;

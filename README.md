@@ -2,7 +2,7 @@
 
 [![version](https://img.shields.io/badge/Gina%20Intell-0.1.0-78b833?labelColor=262626&style=flat-square)](package.json)
 [![Salesforce Agentforce](https://img.shields.io/badge/Agentforce-2GP%20Managed%20%C2%B7%20v66.0-00a1e0?labelColor=262626&style=flat-square)](salesforce/sfdx-project.json)
-[![Evaluation Suite](https://img.shields.io/badge/eval%20suite-47%2F47%20passed%20%C2%B7%2099%25%20Apex-d77757?labelColor=262626&style=flat-square)](scripts/run-challenges.ts)
+[![Evaluation Suite](https://img.shields.io/badge/eval%20suite-48%2F48%20passed%20%C2%B7%2099%25%20Apex-d77757?labelColor=262626&style=flat-square)](scripts/run-challenges.ts)
 [![Node 24.21.0](https://img.shields.io/badge/Node.js-24.21.0-6e6e6e?labelColor=262626&style=flat-square)](package.json)
 [![pnpm 11.28.5](https://img.shields.io/badge/pnpm-11.28.5-6e6e6e?labelColor=262626&style=flat-square)](pnpm-workspace.yaml)
 [![author: Isaac Antunes](https://img.shields.io/badge/author-Isaac%20Antunes-6e6e6e?labelColor=262626&style=flat-square)](https://gina-intell.vercel.app/en)
@@ -60,7 +60,7 @@ Every verification command runs locally with **logical test isolation** and **ze
 
 | Command | What It Verifies |
 |---|---|
-| `npm test` | Runs the 47 deterministic & security challenges ([`scripts/run-challenges.ts`](scripts/run-challenges.ts)) plus all Node integration, parity, and hardening suites (`scripts/*.test.mjs`). |
+| `npm test` | Runs the 48 deterministic & security challenges ([`scripts/run-challenges.ts`](scripts/run-challenges.ts)) plus all Node integration, parity, and hardening suites (`scripts/*.test.mjs`). |
 | `npm run crm:queue -- <compras.csv> --today YYYY-MM-DD` | Spreadsheet/CSV import mode: validates a purchase export, applies the same deterministic engine and prints an owner-reviewed queue (`md`, `html`, `whatsapp` or `csv`). `--require-proof` blocks consent without date + accepted text. No network, no LLM, no customer message. See [`docs/csv-import.md`](docs/csv-import.md). |
 | `npm run hubspot:queue -- <dataset.json> --today YYYY-MM-DD` | HubSpot adapter: maps contacts and closed-won deals to the same engine and prints the owner queue (offline fixture, or `--live` read-only with `HUBSPOT_ACCESS_TOKEN`). See [`docs/hubspot-adapter.md`](docs/hubspot-adapter.md). |
 | `npm run agent:report -- <results.json>` | Normalizes an official Agentforce Studio test run (`sf agent test results --result-format json`) into a deterministic pass/fail report and exits non-zero on any failing scorer. |
@@ -235,7 +235,7 @@ gina-training-lab/
 │   │   ├── crmMath.ts               # Canonical deterministic CRM lifecycle, RFV & margin engine
 │   │   ├── contextEngineering.ts    # Prompt-injection detector, Unicode scrubber & metadata sanitizer
 │   │   ├── ginaPrompts.ts           # Delimited system prompts & structured evaluation schemas
-│   │   ├── challengeRunner.ts       # 47-case deterministic & adversarial evaluation harness
+│   │   ├── challengeRunner.ts       # 48-case deterministic & adversarial evaluation harness
 │   │   └── hostGuard.ts             # Loopback Host-header validator (DNS rebinding defense)
 │   ├── integrations/salesforce/     # Read-only REST client, SOQL ID guard & idempotent Task writer
 │   ├── integrations/csv/            # Spreadsheet import: canonical mapping + owner review queue

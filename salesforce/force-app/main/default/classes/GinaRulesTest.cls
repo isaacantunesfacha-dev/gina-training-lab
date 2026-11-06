@@ -91,6 +91,9 @@ private class GinaRulesTest {
         Assert.areEqual('granted', GinaRules.readConsent(contact(1, 'x', 'granted', false))[0]);
         Assert.areEqual('missing', GinaRules.readConsent(contact(1, 'x', null, false))[0]);
         Assert.areEqual('missing', GinaRules.readConsent(new Contact(LastName = 'sem campos'))[0]);
+        // Unreadable opt-out: "granted" does not count, but "revoked" still does.
+        Assert.areEqual('missing', GinaRules.readConsent(new Contact(LastName = 'sem opt-out', Gina_WhatsApp_Consent__c = 'granted'))[0]);
+        Assert.areEqual('revoked', GinaRules.readConsent(new Contact(LastName = 'sem opt-out', Gina_WhatsApp_Consent__c = 'revoked'))[0]);
     }
 
     @IsTest
@@ -168,6 +171,12 @@ private class GinaRulesTest {
         GinaRules.Decision oneOff = GinaRules.evaluate(new List<Date>{ Date.newInstance(2026, 8, 1) }, TODAY, 80, false, 'granted', 0);
         Assert.areEqual('oneoff_delayed', oneOff.classification);
         Assert.areEqual(70, oneOff.recencyDays);
+
+        GinaRules.Decision ignoredNew = GinaRules.evaluate(
+            new List<Date>{ Date.newInstance(2026, 10, 1) }, TODAY, 80, false, 'granted', 5);
+        Assert.areEqual('dormant', ignoredNew.classification, '3+ ignorados vencem o ramo de cliente novo');
+        Assert.areEqual('dormancy_rest', ignoredNew.recommendedAction);
+        Assert.isTrue(ignoredNew.explanation.contains('5 contatos anteriores foram ignorados'));
 
         GinaRules.Decision future = GinaRules.evaluate(new List<Date>{ Date.newInstance(2026, 10, 11) }, TODAY, 80, false, 'granted', 0);
         Assert.areEqual('reject_invalid', future.recommendedAction);

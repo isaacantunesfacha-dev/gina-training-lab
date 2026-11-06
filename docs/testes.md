@@ -1,6 +1,6 @@
 # Verification & Test Suite Documentation
 
-Current Salesforce status: **17 Apex test methods passing with 99% org-wide code coverage** (Salesforce reports 18 execution entries because it includes the `@TestSetup` method in `GinaActionsTest`). On the Node/TypeScript side, **47 deterministic domain & security challenges** plus **all integration and parity suites** pass offline with zero external API calls.
+Current Salesforce status: **17 Apex test methods passing with 99% org-wide code coverage** (Salesforce reports 18 execution entries because it includes the `@TestSetup` method in `GinaActionsTest`). On the Node/TypeScript side, **48 deterministic domain & security challenges** plus **all integration and parity suites** pass offline with zero external API calls.
 
 ## Salesforce Apex Test Architecture
 

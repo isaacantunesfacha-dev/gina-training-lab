@@ -70,15 +70,17 @@ test('reader refuses plain http and missing tokens, and hides error bodies', asy
 test('consent is never presumed', () => {
   assert.equal(readConsent({ Id: '1', Name: 'x', HasOptedOutOfEmail: true, Gina_WhatsApp_Consent__c: 'granted' }).consent, 'revoked');
   assert.equal(readConsent({ Id: '1', Name: 'x', Gina_WhatsApp_Consent__c: 'revoked' }).consent, 'revoked');
-  assert.equal(readConsent({ Id: '1', Name: 'x', Gina_WhatsApp_Consent__c: 'granted' }).consent, 'granted');
+  assert.equal(readConsent({ Id: '1', Name: 'x', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' }).consent, 'granted');
+  // Unreadable opt-out: "granted" does not count, but "revoked" still does.
+  assert.equal(readConsent({ Id: '1', Name: 'x', Gina_WhatsApp_Consent__c: 'granted' }).consent, 'missing');
   assert.equal(readConsent({ Id: '1', Name: 'x' }).consent, 'missing');
 });
 
 test('Salesforce records become Gina decisions through the deterministic rules', () => {
   const today = new Date('2026-10-10T00:00:00Z');
   const contacts = [
-    { Id: 'ana', Name: 'Ana', Gina_WhatsApp_Consent__c: 'granted' },
-    { Id: 'bruno', Name: 'Bruno', Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'ana', Name: 'Ana', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'bruno', Name: 'Bruno', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
     { Id: 'carla', Name: 'Carla', HasOptedOutOfEmail: true },
     { Id: 'davi', Name: 'Davi' },
   ];
@@ -118,10 +120,10 @@ test('Salesforce records become Gina decisions through the deterministic rules',
 test('contacts without purchases never become VIP', () => {
   const today = new Date('2026-10-10T12:00:00Z');
   const contacts = [
-    { Id: 'semcompra1', Name: 'Sem compra 1', Gina_WhatsApp_Consent__c: 'granted' },
-    { Id: 'semcompra2', Name: 'Sem compra 2', Gina_WhatsApp_Consent__c: 'granted' },
-    { Id: 'semcompra3', Name: 'Sem compra 3', Gina_WhatsApp_Consent__c: 'granted' },
-    { Id: 'eva', Name: 'Eva', Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'semcompra1', Name: 'Sem compra 1', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'semcompra2', Name: 'Sem compra 2', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'semcompra3', Name: 'Sem compra 3', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+    { Id: 'eva', Name: 'Eva', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
   ];
   const orders = [{ Id: 'e1', BillToContactId: 'eva', EffectiveDate: '2026-10-01', TotalAmount: 50, Status: 'Activated' }];
 
@@ -131,6 +133,26 @@ test('contacts without purchases never become VIP', () => {
       assert.equal(customer.facts.isVip, false);
     }
   }
+});
+
+test('three ignored contacts block owner tasks even for a single purchase day', () => {
+  const today = new Date('2026-10-10T00:00:00Z');
+  const contacts = [
+    {
+      Id: 'c1',
+      Name: 'Cliente c1',
+      HasOptedOutOfEmail: false,
+      Gina_WhatsApp_Consent__c: 'granted',
+      Gina_Ignored_Contacts__c: 7,
+    },
+  ];
+  const orders = [{ Id: 'o1', BillToContactId: 'c1', EffectiveDate: '2026-10-05', TotalAmount: 40, Status: 'Activated' }];
+  const [customer] = buildGinaCustomers(contacts, orders, today);
+
+  assert.equal(customer.facts.classification, 'dormant');
+  assert.equal(customer.facts.recommendedAction, 'dormancy_rest');
+  assert.equal(customer.facts.hasSufficientData, false);
+  assert.equal(buildOwnerTask(customer, today), null);
 });
 
 test('only decisions that need the owner become tasks, and none claims a message was sent', () => {
