@@ -8,15 +8,15 @@ import { SalesforceContact, SalesforceOrder } from './types';
 export const DEMO_TODAY = new Date('2026-10-10T00:00:00Z');
 
 export const DEMO_CONTACTS: SalesforceContact[] = [
-  { Id: '003DEMO01', Name: 'Marina Souza', Gina_WhatsApp_Consent__c: 'granted' },
-  { Id: '003DEMO02', Name: 'Ana Lima', Gina_WhatsApp_Consent__c: 'granted' },
-  { Id: '003DEMO03', Name: 'Roberto Alves', Gina_WhatsApp_Consent__c: 'granted' },
-  { Id: '003DEMO04', Name: 'Helena Costa', Gina_WhatsApp_Consent__c: 'granted' },
-  { Id: '003DEMO05', Name: 'Paulo Mendes', Gina_WhatsApp_Consent__c: 'granted' },
-  { Id: '003DEMO06', Name: 'Júlia Rocha', Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO01', Name: 'Marina Souza', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO02', Name: 'Ana Lima', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO03', Name: 'Roberto Alves', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO04', Name: 'Helena Costa', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO05', Name: 'Paulo Mendes', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
+  { Id: '003DEMO06', Name: 'Júlia Rocha', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted' },
   { Id: '003DEMO07', Name: 'Carlos Nunes', HasOptedOutOfEmail: true, Gina_WhatsApp_Consent__c: 'granted' },
   { Id: '003DEMO08', Name: 'Beatriz Ramos' },
-  { Id: '003DEMO09', Name: 'Fernanda Dias', Gina_WhatsApp_Consent__c: 'granted', Gina_Ignored_Contacts__c: 3 },
+  { Id: '003DEMO09', Name: 'Fernanda Dias', HasOptedOutOfEmail: false, Gina_WhatsApp_Consent__c: 'granted', Gina_Ignored_Contacts__c: 3 },
 ];
 
 let seq = 0;

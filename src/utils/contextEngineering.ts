@@ -301,7 +301,7 @@ export function sanitizeOutboundMessage(text: string): { sanitizedText: string; 
  * Robust Text Sanitizer against Disguised Vulnerabilities, Homoglyphs & Backdoors
  * (Grounded in USENIX Security '24 research on stealthy backdoor triggers and prompt disguises).
  * Normalizes Unicode (NFKC), removes zero-width characters, bidirectional overrides,
- * null bytes and dangerous HTML/script vectors.
+ * Unicode tag characters, null bytes and dangerous HTML/script vectors.
  */
 export function normalizeAndSanitizeText(raw: string): {
   sanitized: string;
@@ -333,6 +333,13 @@ export function normalizeAndSanitizeText(raw: string): {
     threatsDetected.push('Caracteres de controle nulos/binários');
   }
   cleaned = cleaned.replace(controlCharsRegex, '');
+
+  // 3b. Strip Unicode tag characters (U+E0000–U+E007F): invisible, and they survive NFKC
+  const unicodeTagRegex = /[\u{E0000}-\u{E007F}]/gu;
+  if (unicodeTagRegex.test(cleaned)) {
+    threatsDetected.push('Caracteres Unicode de tag invisíveis (tag smuggling)');
+  }
+  cleaned = cleaned.replace(unicodeTagRegex, '');
 
   // 4. Unicode Normalization (NFKC) to prevent homoglyph evasion (e.g., Cyrillic 'а' replacing Latin 'a')
   cleaned = cleaned.normalize('NFKC');

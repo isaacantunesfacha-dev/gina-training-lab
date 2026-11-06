@@ -21,13 +21,17 @@ export interface GinaSalesforceCustomer {
 /**
  * Consentimento conservador: nunca presume autorização.
  * - opt-out de e-mail ou campo Gina "revoked" → revogado;
- * - campo Gina "granted" → concedido;
+ * - campo Gina "granted" com opt-out lido → concedido;
+ * - "granted" sem leitura do opt-out → ausente: um opt-out oculto não pode virar autorização;
  * - qualquer outro caso → ausente (sem consentimento documentado).
  */
 export function readConsent(contact: SalesforceContact): Pick<GinaSalesforceCustomer, 'consent' | 'consentSource'> {
   if (contact.HasOptedOutOfEmail) return { consent: 'revoked', consentSource: 'HasOptedOutOfEmail' };
   if (contact.Gina_WhatsApp_Consent__c === 'revoked') return { consent: 'revoked', consentSource: 'Gina_WhatsApp_Consent__c' };
-  if (contact.Gina_WhatsApp_Consent__c === 'granted') return { consent: 'granted', consentSource: 'Gina_WhatsApp_Consent__c' };
+  if (contact.Gina_WhatsApp_Consent__c === 'granted') {
+    if (typeof contact.HasOptedOutOfEmail !== 'boolean') return { consent: 'missing', consentSource: 'opt-out de e-mail sem leitura' };
+    return { consent: 'granted', consentSource: 'Gina_WhatsApp_Consent__c' };
+  }
   return { consent: 'missing', consentSource: 'sem registro de consentimento' };
 }
 

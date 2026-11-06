@@ -61,15 +61,20 @@ public with sharing class GinaRules {
 
     /**
      * Consentimento conservador: nunca presume autorização.
-     * Opt-out de e-mail ou campo Gina "revoked" → revogado; campo "granted" → concedido;
+     * Opt-out de e-mail ou campo Gina "revoked" → revogado; campo "granted" com opt-out lido → concedido;
+     * "granted" sem leitura do opt-out → ausente: um opt-out oculto não pode virar autorização;
      * qualquer outro caso (inclusive campo sem permissão de leitura) → ausente.
      */
     public static List<String> readConsent(Contact contact) {
         Map<String, Object> fields = contact.getPopulatedFieldsAsMap();
-        if (fields.get('HasOptedOutOfEmail') == true) return new List<String>{ 'revoked', 'HasOptedOutOfEmail' };
+        Object optOut = fields.get('HasOptedOutOfEmail');
+        if (optOut == true) return new List<String>{ 'revoked', 'HasOptedOutOfEmail' };
         Object whatsapp = fields.get(CONSENT_FIELD);
         if (whatsapp == 'revoked') return new List<String>{ 'revoked', 'Gina_WhatsApp_Consent__c' };
-        if (whatsapp == 'granted') return new List<String>{ 'granted', 'Gina_WhatsApp_Consent__c' };
+        if (whatsapp == 'granted') {
+            if (optOut == null) return new List<String>{ 'missing', 'opt-out de e-mail sem leitura' };
+            return new List<String>{ 'granted', 'Gina_WhatsApp_Consent__c' };
+        }
         return new List<String>{ 'missing', 'sem registro de consentimento' };
     }
 
