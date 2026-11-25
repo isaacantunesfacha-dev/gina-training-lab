@@ -225,10 +225,7 @@ All character studies, typographic alignment grids, icon geometry specs, and cas
 
 ```text
 gina-training-lab/
-├── AGENTS.md                        # Engineering, AI safety & hygiene directives for autonomous agents
-├── CLAUDE.md                        # DevSecOps, supply-chain & build reproducibility rules
 ├── README.md                        # Project overview, architecture & evaluation documentation
-├── VALIDACAO.md                     # Local verification & engineering validation report
 ├── server.ts                        # Loopback-bound (127.0.0.1) Express API & Salesforce/Gemini connectors
 ├── src/
 │   ├── utils/

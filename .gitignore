@@ -14,9 +14,9 @@ coverage/
 temp/
 temp/agent-preview/
 
-# Local Claude Code configuration (machine-specific settings)
-.claude/*
-!.claude/agents/
+# Local Claude Code & MCP configuration
+.claude/
+.mcp.json
 
 # Salesforce CLI local state
 .sf/
